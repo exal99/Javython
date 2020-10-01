@@ -1,0 +1,27 @@
+Program
+  List
+    ClassDecl
+      IdDecl ID="MyClass"
+      List
+        FunctionDecl
+          TypedIdDecl
+            IdType ID="MyClass"
+            IdDecl ID="myMethod"
+          List
+          Block
+            List
+              ReturnStatement
+                ThisExpression
+    FunctionDecl
+      TypedIdDecl
+        IdType ID="MyClass"
+        IdDecl ID="myFunc"
+      List
+        TypedIdDecl
+          IntType
+          IdDecl ID="i"
+      Block
+        List
+          ReturnStatement
+            NewClassExpression ID="MyClass"
+              List
