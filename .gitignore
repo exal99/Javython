@@ -3,3 +3,4 @@
 *.jar
 src/gen/*
 bin/*
+build/*
