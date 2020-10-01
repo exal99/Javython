@@ -1,6 +1,7 @@
 .*
 !.gitignore
 *.jar
+!gradle-wrapper.jar
 src/gen/*
 bin/*
 build/*
