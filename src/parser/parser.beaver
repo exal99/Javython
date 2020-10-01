@@ -38,12 +38,12 @@
 %typeof while = "WhileStatement";
 %typeof if = "IfStatement";
 %typeof functionCallStmt = "FunctionCallStatement";
-%typeof expretion = "Expretion";
-%typeof compExpr = "Expretion";
-%typeof arithmeticExpr = "Expretion";
-%typeof termExpr = "Expretion";
-%typeof factorExpr = "Expretion";
-%typeof newClass = "NewClassExpretion";
+%typeof expretion = "Expression";
+%typeof compExpr = "Expression";
+%typeof arithmeticExpr = "Expression";
+%typeof termExpr = "Expression";
+%typeof factorExpr = "Expression";
+%typeof newClass = "NewClassExpression";
 %typeof functionCall = "FunctionCall";
 %typeof optExprList = "List";
 %typeof exprList = "List";
@@ -59,7 +59,7 @@ defenitionList =  /* epsilon */ {: return new List(); :}
 				| defenitionList.defList classDecl.cd {: return defList.add(cd); :}
 				| defenitionList.defList varDecl.vd SEMICOLON {: return defList.add(vd); :};
 
-block = LBRACE statementList RBRACE;
+block = LBRACE statementList.l RBRACE {: return new Block(l);:};
 
 varDecl = typeDecl | declAndAssign;
 
@@ -69,10 +69,10 @@ functionDecl = type.t ID.id LPAREN optArgList.args RPAREN block.b
 optArgList = /* epsilon */ {: return new List(); :}
 		   | argList; 
 
-argList = type.t ID.id {: return new List(new TypedIdDecl(t, new IdDecl(id))):}
-		| argList.l COMMA type.t ID.id {: return l.add(new TypedIdDecl(t, new IdDecl(id))):};
+argList = type.t ID.id {: return new List(new TypedIdDecl(t, new IdDecl(id))); :}
+		| argList.l COMMA type.t ID.id {: return l.add(new TypedIdDecl(t, new IdDecl(id))); :};
 
-statementList =   /* epsilon */ {: return new List() :}
+statementList =   /* epsilon */ {: return new List(); :}
 				| statementList.l statement.s SEMICOLON {: return l.add(s); :};
 
 statement =   assign
@@ -84,63 +84,66 @@ statement =   assign
 			| functionDecl
 			| classDecl;
 
-assign = ID.id ASSIGN expretion.e {: return new AssignStatement(id, e) :};
-declAndAssign = type.t ID.id ASSIGN expretion.e {: return new VarDecl(new TypedIdDecl(t, new IdDecl(id), new Opt(e))); :};
-typeDecl = type.t ID.id {: return new VarDecl(new TypedIdDecl(t, new IdDecl(id), new Opt())); :};
+assign = ID.id ASSIGN expretion.e {: return new AssignStatement(new IdUse(id), e); :};
+declAndAssign = type.t ID.id ASSIGN expretion.e {: return new VarDecl(new TypedIdDecl(t, new IdDecl(id)), new Opt(e)); :};
+typeDecl = type.t ID.id {: return new VarDecl(new TypedIdDecl(t, new IdDecl(id)), new Opt()); :};
 return = RETURN expretion.e {: return new ReturnStatement(e); :};
 while = WHILE LPAREN expretion.e RPAREN block.b {: return new WhileStatement(e, b); :} ;
 
 if =  ifStart 
-	| ifStart.s ELSE block.b {: return new IfStatement(s.getExpretion(), s.getIfBlock(), new Opt(b)); :};
+	| ifStart.s ELSE block.b {: return new IfStatement(s.getExpression(), s.getIfBlock(), new Opt(b)); :};
 ifStart = IF LPAREN expretion.e RPAREN block.b {: return new IfStatement(e, b, new Opt()); :};
 
 functionCallStmt = functionCall.fc {: return new FunctionCallStatement(fc); :};
 
-expretion = expretion AND compExpr
-		  | expretion OR  compExpr
-		  | expretion XOR compExpr
+expretion = expretion.e1 AND compExpr.e2 {: return new AndExpression(e1, e2); :}
+		  | expretion.e1 OR  compExpr.e2 {: return new OrExpression(e1, e2); :}
+		  | expretion.e1 XOR compExpr.e2 {: return new XorExpression(e1, e2); :}
 		  | compExpr;
 
-compExpr = compExpr EQ arithmeticExpr
-		 | compExpr NEQ arithmeticExpr
-		 | compExpr LT arithmeticExpr
-		 | compExpr GT arithmeticExpr
-		 | compExpr GTEQ arithmeticExpr
-		 | compExpr LTEQ arithmeticExpr
+compExpr = compExpr.e1 EQ arithmeticExpr.e2 {: return new EqExpression(e1, e2); :}
+		 | compExpr.e1 NEQ arithmeticExpr.e2 {: return new NeqExpression(e1, e2); :}
+		 | compExpr.e1 LT arithmeticExpr.e2 {: return new LtExpression(e1, e2); :}
+		 | compExpr.e1 GT arithmeticExpr.e2 {: return new GtExpression(e1, e2); :}
+		 | compExpr.e1 GTEQ arithmeticExpr.e2 {: return new GtEqExpression(e1, e2); :}
+		 | compExpr.e1 LTEQ arithmeticExpr.e2 {: return new LtEqExpression(e1, e2); :}
 		 | arithmeticExpr;
 
-arithmeticExpr = arithmeticExpr PLUS termExpr
-			   | arithmeticExpr MINUS termExpr
+arithmeticExpr = arithmeticExpr.e1 PLUS termExpr.e2 {: return new PlusExpression(e1, e2); :}
+			   | arithmeticExpr.e1 MINUS termExpr.e2 {: return new MinusExpression(e1, e2); :}
 			   | termExpr;
 
-termExpr = termExpr STAR factorExpr
-		 | termExpr SLASH factorExpr
-		 | termExpr MOD factorExpr
+termExpr = termExpr.e1 STAR factorExpr.e2 {: return new TimesExpression(e1, e2); :}
+		 | termExpr.e1 SLASH factorExpr.e2 {: return new DivExpression(e1, e2); :}
+		 | termExpr.e1 MOD factorExpr.e2 {: return new ModExpression(e1, e2); :}
 		 | factorExpr;
 
-factorExpr = ID
-		   | INTEGER
-		   | FLOAT
-		   | STRING
-		   | MINUS factorExpr
-		   | LPAREN expretion RPAREN
+factorExpr = ID.id {: return new IdExpression(id); :}
+		   | INTEGER.i {: return new IntegerExpression(i); :}
+		   | FLOAT.f {: return new FloatExpression(f); :}
+		   | STRING.s {: return new StringExpression(s); :}
+		   | MINUS factorExpr.e {: return new NegateExpression(e); :}
+		   | LPAREN expretion.e RPAREN {: return new ParenExpression(e); :}
 		   | functionCall
-		   | TRUE
-		   | FALSE
-		   | THIS
-		   | NOT factorExpr
+		   | TRUE {: return new TrueExpression(); :}
+		   | FALSE {: return new FalseExpression(); :}
+		   | THIS {: return new ThisExpression(); :}
+		   | NOT factorExpr.e {: return new NotExpression(e); :}
 		   | newClass;
 
-newClass = NEW ID LPAREN optExprList RPAREN;
-functionCall = ID LPAREN optExprList RPAREN;
+newClass = NEW ID.id LPAREN optExprList.args RPAREN {: return new NewClassExpression(id, args); :};
+functionCall = ID.id LPAREN optExprList.args RPAREN {: return new FunctionCallExpression(new FunctionCall(id, args)); :};
 
-optExprList = /* epsilon */
+optExprList = /* epsilon */ {: return new List(); :}
 			| exprList;
 
-exprList = expretion
-		|  exprList COMMA expretion;
+exprList = expretion.e {: return new List(e); :}
+		|  exprList.l COMMA expretion.e {: return l.add(e); :};
 
 
-classDecl = CLASS ID LBRACE defenitionList RBRACE;
+classDecl = CLASS ID.id LBRACE defenitionList.defs RBRACE {: return new ClassDecl(new IdDecl(id), defs); :};
 
-type = INTTYPE | FLOATTYPE | BOOLTYPE | ID;
+type = INTTYPE {: return new IntType();:}
+	|  FLOATTYPE {: return new FloatType(); :}
+	|  BOOLTYPE {: return new BoolType(); :}
+	|  ID.id {: return new IdType(id); :};

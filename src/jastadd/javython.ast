@@ -4,7 +4,7 @@ abstract Decl;
 
 FunctionDecl : Decl ::= Name:TypedIdDecl Arg:TypedIdDecl* Block;
 ClassDecl : Decl ::= IdDecl Decl*;
-VarDecl : Decl ::= TypedIdDecl [Expretion];
+VarDecl : Decl ::= TypedIdDecl [Expression];
 
 TypedIdDecl ::= Type IdDecl;
 
@@ -15,54 +15,56 @@ Block ::= Statement*;
 
 abstract Statement;
 
-AssignStatement : Statement ::= IdUse Expretion;
+AssignStatement : Statement ::= IdUse Expression;
 VarDeclStatement : Statement ::= VarDecl;
-ReturnStatement : Statement ::= Expretion;
-WhileStatement : Statement ::= Expretion Block;
-IfStatement : Statement ::= Expretion IfBlock:Block [ElseBlock:Block];
+ReturnStatement : Statement ::= Expression;
+WhileStatement : Statement ::= Expression Block;
+IfStatement : Statement ::= Expression IfBlock:Block [ElseBlock:Block];
 FunctionCallStatement : Statement ::= FunctionCall;
 FunctionDeclStatement : Statement ::= FunctionDecl;
 ClassDeclStatement : Statement ::= ClassDecl;
 
 
-abstract Expretion;
+abstract Expression;
 
-abstract BinaryOperator : Expretion ::= Left:Expretion Right:Expretion;
-abstract UnaryOperator : Expretion ::= Expretion;
+abstract BinaryOperator : Expression ::= Left:Expression Right:Expression;
+abstract UnaryOperator : Expression ::= Expression;
 
-AndExpreiton : BinaryOperator;
-OrExpretion : BinaryOperator;
-XorExpretion : BinaryOperator;
-EqExpretion : BinaryOperator;
-NeqExpretion : BinaryOperator;
-LtExpretion : BinaryOperator;
-GtExpretion : BinaryOperator;
-GtEqExpretion : BinaryOperator;
-LtEqExpretion : BinaryOperator;
-PlusExpretion : BinaryOperator;
-MinusExpretion : BinaryOperator;
-TimesExpretion : BinaryOperator;
-DivExpretion : BinaryOperator;
-ModExpretion : BinaryOperator;
+AndExpression : BinaryOperator;
+OrExpression : BinaryOperator;
+XorExpression : BinaryOperator;
+EqExpression : BinaryOperator;
+NeqExpression : BinaryOperator;
+LtExpression : BinaryOperator;
+GtExpression : BinaryOperator;
+GtEqExpression : BinaryOperator;
+LtEqExpression : BinaryOperator;
+PlusExpression : BinaryOperator;
+MinusExpression : BinaryOperator;
+TimesExpression : BinaryOperator;
+DivExpression : BinaryOperator;
+ModExpression : BinaryOperator;
 
-IdExpretion : Expretion ::= <ID:String>;
-IntegerExpretion : Expretion ::= <INTEGER:String>;
-FloatExpretion : Expretion ::= <FLOAT:String>;
-TrueExpretion : Expretion;
-FalseExpretion : Expretion;
-ThisExpretion : Expretion;
+IdExpression : Expression ::= <ID:String>;
+IntegerExpression : Expression ::= <INTEGER:String>;
+FloatExpression : Expression ::= <FLOAT:String>;
+TrueExpression : Expression;
+FalseExpression : Expression;
+ThisExpression : Expression;
+StringExpression : Expression ::= <STRING:String>;
 
-NegateExpretion : UnaryOperator;
-ParenExpretion : UnaryOperator;
-NotExpretion : UnaryOperator;
+NegateExpression : UnaryOperator;
+ParenExpression : UnaryOperator;
+NotExpression : UnaryOperator;
 
-FunctionCallExpretion : Expretion ::= FunctionCall;
-NewClassExpretion : Expretion ::= <ID:String> Expretion*;
+FunctionCallExpression : Expression ::= FunctionCall;
+NewClassExpression : Expression ::= <ID:String> Expression*;
 
-FunctionCall ::= <ID:String> Expretion*;
+FunctionCall ::= <ID:String> Expression*;
 
 abstract Type;
 
 IntType : Type;
+FloatType : Type;
 BoolType : Type;
 IdType : Type ::= <ID:String>;
