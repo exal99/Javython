@@ -1,0 +1,3 @@
+// __valid__
+int a = 5;
+bool x = false;

@@ -1,0 +1,4 @@
+// __valid__
+bool myFunc(int a) {
+    return 6;
+}

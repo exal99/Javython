@@ -1,0 +1,146 @@
+%class "LangParser";
+%package "lang.ast";
+
+%embed {:
+	static public class SyntaxError extends RuntimeException { public SyntaxError(String msg) {super(msg);}}
+	// Disable syntax error recovery
+	protected void recoverFromError(Symbol token, TokenStream in) {
+		throw new SyntaxError("Cannot recover from the syntax error");
+	}
+:};
+
+%terminals INTTYPE, BOOLTYPE, FLOATTYPE;
+%terminals CLASS, RETURN, THIS, IF, ELSE, WHILE, NEW;
+
+%terminals PLUS, MINUS, STAR, SLASH, MOD, ASSIGN, NOT;
+%terminals EQ, NEQ, LT, GT, LTEQ, GTEQ, AND, OR, XOR;
+
+%terminals STRING, ID, INTEGER, FLOAT, TRUE, FALSE;
+
+%terminals LPAREN, RPAREN, LBRACE, RBRACE, COMMA, SEMICOLON;
+
+
+%typeof program = "Program";
+%typeof defenitionList = "List";
+%typeof functionDecl = "FunctionDecl";
+%typeof classDecl = "ClassDecl";
+%typeof varDecl = "VarDecl";
+%typeof block = "Block";
+%typeof statementList = "List";
+%typeof type = "Type";
+%typeof typeDecl = "VarDecl";
+%typeof declAndAssign = "VarDecl";
+%typeof optArgList = "List";
+%typeof argList = "List";
+%typeof statement = "Statement";
+%typeof assign = "AssignStatement";
+%typeof return = "ReturnStatement";
+%typeof while = "WhileStatement";
+%typeof if = "IfStatement";
+%typeof functionCallStmt = "FunctionCallStatement";
+%typeof expretion = "Expretion";
+%typeof compExpr = "Expretion";
+%typeof arithmeticExpr = "Expretion";
+%typeof termExpr = "Expretion";
+%typeof factorExpr = "Expretion";
+%typeof newClass = "NewClassExpretion";
+%typeof functionCall = "FunctionCall";
+%typeof optExprList = "List";
+%typeof exprList = "List";
+%typeof ifStart = "IfStatement";
+
+
+%goal program;
+
+program = defenitionList.defList {: return new Program(defList); :};
+
+defenitionList =  /* epsilon */ {: return new List(); :}
+				| defenitionList.defList functionDecl.fd {: return defList.add(fd); :}
+				| defenitionList.defList classDecl.cd {: return defList.add(cd); :}
+				| defenitionList.defList varDecl.vd SEMICOLON {: return defList.add(vd); :};
+
+block = LBRACE statementList RBRACE;
+
+varDecl = typeDecl | declAndAssign;
+
+functionDecl = type.t ID.id LPAREN optArgList.args RPAREN block.b
+	{: return new FunctionDecl(new TypedIdDecl(t, new IdDecl(id)), args, b); :};
+
+optArgList = /* epsilon */ {: return new List(); :}
+		   | argList; 
+
+argList = type.t ID.id {: return new List(new TypedIdDecl(t, new IdDecl(id))):}
+		| argList.l COMMA type.t ID.id {: return l.add(new TypedIdDecl(t, new IdDecl(id))):};
+
+statementList =   /* epsilon */ {: return new List() :}
+				| statementList.l statement.s SEMICOLON {: return l.add(s); :};
+
+statement =   assign
+			| varDecl
+			| return
+			| while
+			| if
+			| functionCallStmt
+			| functionDecl
+			| classDecl;
+
+assign = ID.id ASSIGN expretion.e {: return new AssignStatement(id, e) :};
+declAndAssign = type.t ID.id ASSIGN expretion.e {: return new VarDecl(new TypedIdDecl(t, new IdDecl(id), new Opt(e))); :};
+typeDecl = type.t ID.id {: return new VarDecl(new TypedIdDecl(t, new IdDecl(id), new Opt())); :};
+return = RETURN expretion.e {: return new ReturnStatement(e); :};
+while = WHILE LPAREN expretion.e RPAREN block.b {: return new WhileStatement(e, b); :} ;
+
+if =  ifStart 
+	| ifStart.s ELSE block.b {: return new IfStatement(s.getExpretion(), s.getIfBlock(), new Opt(b)); :};
+ifStart = IF LPAREN expretion.e RPAREN block.b {: return new IfStatement(e, b, new Opt()); :};
+
+functionCallStmt = functionCall.fc {: return new FunctionCallStatement(fc); :};
+
+expretion = expretion AND compExpr
+		  | expretion OR  compExpr
+		  | expretion XOR compExpr
+		  | compExpr;
+
+compExpr = compExpr EQ arithmeticExpr
+		 | compExpr NEQ arithmeticExpr
+		 | compExpr LT arithmeticExpr
+		 | compExpr GT arithmeticExpr
+		 | compExpr GTEQ arithmeticExpr
+		 | compExpr LTEQ arithmeticExpr
+		 | arithmeticExpr;
+
+arithmeticExpr = arithmeticExpr PLUS termExpr
+			   | arithmeticExpr MINUS termExpr
+			   | termExpr;
+
+termExpr = termExpr STAR factorExpr
+		 | termExpr SLASH factorExpr
+		 | termExpr MOD factorExpr
+		 | factorExpr;
+
+factorExpr = ID
+		   | INTEGER
+		   | FLOAT
+		   | STRING
+		   | MINUS factorExpr
+		   | LPAREN expretion RPAREN
+		   | functionCall
+		   | TRUE
+		   | FALSE
+		   | THIS
+		   | NOT factorExpr
+		   | newClass;
+
+newClass = NEW ID LPAREN optExprList RPAREN;
+functionCall = ID LPAREN optExprList RPAREN;
+
+optExprList = /* epsilon */
+			| exprList;
+
+exprList = expretion
+		|  exprList COMMA expretion;
+
+
+classDecl = CLASS ID LBRACE defenitionList RBRACE;
+
+type = INTTYPE | FLOATTYPE | BOOLTYPE | ID;

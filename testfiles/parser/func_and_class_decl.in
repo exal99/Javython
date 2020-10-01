@@ -1,0 +1,11 @@
+// __valid__
+
+class MyClass {
+    MyClass myMethod() {
+        return this;
+    }
+}
+
+MyClass myFunc(int i) {
+    return new MyClass();
+}

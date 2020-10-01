@@ -1,0 +1,68 @@
+Program ::= Decl*;
+
+abstract Decl;
+
+FunctionDecl : Decl ::= Name:TypedIdDecl Arg:TypedIdDecl* Block;
+ClassDecl : Decl ::= IdDecl Decl*;
+VarDecl : Decl ::= TypedIdDecl [Expretion];
+
+TypedIdDecl ::= Type IdDecl;
+
+IdDecl ::= <ID:String>;
+IdUse ::= <ID:String>;
+
+Block ::= Statement*;
+
+abstract Statement;
+
+AssignStatement : Statement ::= IdUse Expretion;
+VarDeclStatement : Statement ::= VarDecl;
+ReturnStatement : Statement ::= Expretion;
+WhileStatement : Statement ::= Expretion Block;
+IfStatement : Statement ::= Expretion IfBlock:Block [ElseBlock:Block];
+FunctionCallStatement : Statement ::= FunctionCall;
+FunctionDeclStatement : Statement ::= FunctionDecl;
+ClassDeclStatement : Statement ::= ClassDecl;
+
+
+abstract Expretion;
+
+abstract BinaryOperator : Expretion ::= Left:Expretion Right:Expretion;
+abstract UnaryOperator : Expretion ::= Expretion;
+
+AndExpreiton : BinaryOperator;
+OrExpretion : BinaryOperator;
+XorExpretion : BinaryOperator;
+EqExpretion : BinaryOperator;
+NeqExpretion : BinaryOperator;
+LtExpretion : BinaryOperator;
+GtExpretion : BinaryOperator;
+GtEqExpretion : BinaryOperator;
+LtEqExpretion : BinaryOperator;
+PlusExpretion : BinaryOperator;
+MinusExpretion : BinaryOperator;
+TimesExpretion : BinaryOperator;
+DivExpretion : BinaryOperator;
+ModExpretion : BinaryOperator;
+
+IdExpretion : Expretion ::= <ID:String>;
+IntegerExpretion : Expretion ::= <INTEGER:String>;
+FloatExpretion : Expretion ::= <FLOAT:String>;
+TrueExpretion : Expretion;
+FalseExpretion : Expretion;
+ThisExpretion : Expretion;
+
+NegateExpretion : UnaryOperator;
+ParenExpretion : UnaryOperator;
+NotExpretion : UnaryOperator;
+
+FunctionCallExpretion : Expretion ::= FunctionCall;
+NewClassExpretion : Expretion ::= <ID:String> Expretion*;
+
+FunctionCall ::= <ID:String> Expretion*;
+
+abstract Type;
+
+IntType : Type;
+BoolType : Type;
+IdType : Type ::= <ID:String>;

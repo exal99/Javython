@@ -1,0 +1,7 @@
+// __valid__
+
+class MyClass {
+    bool myMethod(int a) {
+        return 6;
+    }
+}
