@@ -1,0 +1,12 @@
+// __valid__
+
+class A {
+    int myMethod() {
+        return 5;
+    }
+}
+
+int main() {
+    A a = new A();
+    a.myMethod();
+}

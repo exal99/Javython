@@ -5,7 +5,7 @@
 	static public class SyntaxError extends RuntimeException { public SyntaxError(String msg) {super(msg);}}
 	// Disable syntax error recovery
 	protected void recoverFromError(Symbol token, TokenStream in) {
-		throw new SyntaxError("Cannot recover from the syntax error");
+		throw new SyntaxError("Cannot recover from the syntax error at line " + (token.getLine(token.getStart()) + 1) + " column " + token.getColumn(token.getStart()));
 	}
 :};
 
@@ -17,7 +17,7 @@
 
 %terminals STRING, ID, INTEGER, FLOAT, TRUE, FALSE;
 
-%terminals LPAREN, RPAREN, LBRACE, RBRACE, COMMA, SEMICOLON;
+%terminals LPAREN, RPAREN, LBRACE, RBRACE, COMMA, SEMICOLON, DOT;
 
 
 %typeof program = "Program";
@@ -48,6 +48,9 @@
 %typeof optExprList = "List";
 %typeof exprList = "List";
 %typeof ifStart = "IfStatement";
+%typeof methodCall = "MethodCall";
+%typeof methodCallStatement = "MethodCallStatement";
+%typeof methodCallExpression = "MethodCallExpression";
 
 
 %goal program;
@@ -76,13 +79,14 @@ statementList =   /* epsilon */ {: return new List(); :}
 				| statementList.l statement.s SEMICOLON {: return l.add(s); :};
 
 statement =   assign
-			| varDecl
+			| varDecl.v {: return new VarDeclStatement(v); :}
 			| return
 			| while
 			| if
+			| methodCall.mc {: return new MethodCallStatement(mc); :}
 			| functionCallStmt
-			| functionDecl
-			| classDecl;
+			| functionDecl.fd {: return new FunctionDeclStatement(fd); :}
+			| classDecl.cd {: return new ClassDeclStatement(cd); :};
 
 assign = ID.id ASSIGN expretion.e {: return new AssignStatement(new IdUse(id), e); :};
 declAndAssign = type.t ID.id ASSIGN expretion.e {: return new VarDecl(new TypedIdDecl(t, new IdDecl(id)), new Opt(e)); :};
@@ -116,23 +120,28 @@ arithmeticExpr = arithmeticExpr.e1 PLUS termExpr.e2 {: return new PlusExpression
 termExpr = termExpr.e1 STAR factorExpr.e2 {: return new TimesExpression(e1, e2); :}
 		 | termExpr.e1 SLASH factorExpr.e2 {: return new DivExpression(e1, e2); :}
 		 | termExpr.e1 MOD factorExpr.e2 {: return new ModExpression(e1, e2); :}
+		 | NOT factorExpr.e {: return new NotExpression(e); :}
+		 | MINUS factorExpr.e {: return new NegateExpression(e); :}
 		 | factorExpr;
 
 factorExpr = ID.id {: return new IdExpression(id); :}
 		   | INTEGER.i {: return new IntegerExpression(i); :}
 		   | FLOAT.f {: return new FloatExpression(f); :}
 		   | STRING.s {: return new StringExpression(s); :}
-		   | MINUS factorExpr.e {: return new NegateExpression(e); :}
 		   | LPAREN expretion.e RPAREN {: return new ParenExpression(e); :}
-		   | functionCall
 		   | TRUE {: return new TrueExpression(); :}
 		   | FALSE {: return new FalseExpression(); :}
 		   | THIS {: return new ThisExpression(); :}
-		   | NOT factorExpr.e {: return new NotExpression(e); :}
-		   | newClass;
+		   | newClass
+		   | methodCall.mc {: return new MethodCallExpression(mc); :}
+		   | functionCall;
 
+
+methodCall = factorExpr.classExp DOT ID.id LPAREN optExprList.args RPAREN {: return new MethodCall(classExp, id, args); :};
 newClass = NEW ID.id LPAREN optExprList.args RPAREN {: return new NewClassExpression(id, args); :};
 functionCall = ID.id LPAREN optExprList.args RPAREN {: return new FunctionCallExpression(new FunctionCall(id, args)); :};
+
+
 
 optExprList = /* epsilon */ {: return new List(); :}
 			| exprList;

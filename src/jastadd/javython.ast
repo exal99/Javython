@@ -23,6 +23,7 @@ IfStatement : Statement ::= Expression IfBlock:Block [ElseBlock:Block];
 FunctionCallStatement : Statement ::= FunctionCall;
 FunctionDeclStatement : Statement ::= FunctionDecl;
 ClassDeclStatement : Statement ::= ClassDecl;
+MethodCallStatement : Statement ::= MethodCall;
 
 
 abstract Expression;
@@ -58,9 +59,11 @@ ParenExpression : UnaryOperator;
 NotExpression : UnaryOperator;
 
 FunctionCallExpression : Expression ::= FunctionCall;
+MethodCallExpression : Expression ::= MethodCall;
 NewClassExpression : Expression ::= <ID:String> Expression*;
 
 FunctionCall ::= <ID:String> Expression*;
+MethodCall ::= ClassExpression:Expression <ID:String> Args:Expression*;
 
 abstract Type;
 

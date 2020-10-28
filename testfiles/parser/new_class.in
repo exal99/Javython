@@ -1,0 +1,5 @@
+// __valid__
+
+int main() {
+    A a = new A();
+}
