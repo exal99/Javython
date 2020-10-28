@@ -37,7 +37,6 @@
 %typeof return = "ReturnStatement";
 %typeof while = "WhileStatement";
 %typeof if = "IfStatement";
-%typeof functionCallStmt = "FunctionCallStatement";
 %typeof expretion = "Expression";
 %typeof compExpr = "Expression";
 %typeof arithmeticExpr = "Expression";
@@ -84,7 +83,7 @@ statement =   assign
 			| while
 			| if
 			| methodCall.mc {: return new MethodCallStatement(mc); :}
-			| functionCallStmt
+			| functionCall.fc {: return new FunctionCallStatement(fc); :} 
 			| functionDecl.fd {: return new FunctionDeclStatement(fd); :}
 			| classDecl.cd {: return new ClassDeclStatement(cd); :};
 
@@ -97,8 +96,6 @@ while = WHILE LPAREN expretion.e RPAREN block.b {: return new WhileStatement(e, 
 if =  ifStart 
 	| ifStart.s ELSE block.b {: return new IfStatement(s.getExpression(), s.getIfBlock(), new Opt(b)); :};
 ifStart = IF LPAREN expretion.e RPAREN block.b {: return new IfStatement(e, b, new Opt()); :};
-
-functionCallStmt = functionCall.fc {: return new FunctionCallStatement(fc); :};
 
 expretion = expretion.e1 AND compExpr.e2 {: return new AndExpression(e1, e2); :}
 		  | expretion.e1 OR  compExpr.e2 {: return new OrExpression(e1, e2); :}
@@ -134,12 +131,12 @@ factorExpr = ID.id {: return new IdExpression(id); :}
 		   | THIS {: return new ThisExpression(); :}
 		   | newClass
 		   | methodCall.mc {: return new MethodCallExpression(mc); :}
-		   | functionCall;
+		   | functionCall.fc {: return new FunctionCallExpression(fc); :};
 
 
 methodCall = factorExpr.classExp DOT ID.id LPAREN optExprList.args RPAREN {: return new MethodCall(classExp, id, args); :};
 newClass = NEW ID.id LPAREN optExprList.args RPAREN {: return new NewClassExpression(id, args); :};
-functionCall = ID.id LPAREN optExprList.args RPAREN {: return new FunctionCallExpression(new FunctionCall(id, args)); :};
+functionCall = ID.id LPAREN optExprList.args RPAREN {: return new FunctionCall(id, args); :};
 
 
 
